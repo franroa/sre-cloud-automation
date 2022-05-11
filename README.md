@@ -122,3 +122,5 @@ terraform destroy
 ## License
 
 [License](../LICENSE.md)
+
+https://github.com/udacity/nd087-c3-self-healing-architectures-exercises/blob/master/lesson-2-deployment-strategies/exercises/solution/exercise-3/canary.sh

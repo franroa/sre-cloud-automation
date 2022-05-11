@@ -1,0 +1,1 @@
+kubectl apply -f green.yml,index_green_html.yml

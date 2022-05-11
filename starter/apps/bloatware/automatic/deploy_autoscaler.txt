@@ -1,0 +1,42 @@
+1. Create the IAM policy attached to this folder
+
+
+
+2. Execute following instructions:
+export AWS_PROFILE=sre
+
+eksctl utils associate-iam-oidc-provider \
+--cluster udacity-cluster \
+--approve \
+--region=us-east-2
+
+eksctl  create iamserviceaccount --name autoscler --namespace kube-system --cluster udacity-cluster --attach-policy-arn arn:aws:iam::862768565873:policy/autoscaler --approve --region us-east-2
+
+kubectl apply -f cluster-autoscaler-autodiscover.yaml
+
+
+
+3. Configure the autoscaler
+
+kubectl annotate serviceaccount cluster-autoscaler \
+  -n kube-system \
+  eks.amazonaws.com/role-arn=arn:aws:iam::<ACCOUNT_ID>:role/<AmazonEKSClusterAutoscalerRole>
+
+kubectl patch deployment cluster-autoscaler \
+  -n kube-system \
+  -p '{"spec":{"template":{"metadata":{"annotations":{"cluster-autoscaler.kubernetes.io/safe-to-evict": "false"}}}}}'kube
+
+spec:
+  containers:
+  - command
+    - ./cluster-autoscaler
+    - --v=4
+    - --stderrthreshold=info
+    - --cloud-provider=aws
+    - --skip-nodes-with-local-storage=false
+    - --expander=least-waste
+    - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/<YOUR CLUSTER NAME>
+    - --balance-similar-node-groups
+    - --skip-nodes-with-system-pods=false
+
+
